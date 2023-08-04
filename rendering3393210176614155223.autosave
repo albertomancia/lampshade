@@ -1,0 +1,17 @@
+void drawTiers() {
+    stroke(255, 0, 0);
+    for (float tier : tiers) {
+        line(0, tier, width, tier);
+    }
+}
+
+void drawIntersections() {
+    for(float tier : tiers) {
+        drawHandle(findIntersection(tier), tier)
+    }
+}
+
+void drawHandle(PVector p) {
+    circle(p.x, p.y, 5);
+    circle(p.x, p.y, 30);
+}
