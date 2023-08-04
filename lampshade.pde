@@ -39,9 +39,9 @@ void draw() {
     loadLengthsAndAngles();
 
     String s = "captures/Capture " + hour() + "-" + minute() + "-" + second() + ".svg";
-    if (save) beginRecord(SVG, s);
 
     if (!showTemplate) {
+        if (save) beginRecord(SVG, s);
         noFill();
         if (showLines) {
             strokeWeight(1);
@@ -80,6 +80,7 @@ void draw() {
         text("pleats: " + n_pleats, 20, 20);
         text("Aspect ratio 1:" + aspectRatio, 100, 20);
 
+        if (save) beginRecord(SVG, s);
         noFill();
         stroke(0);
         strokeWeight(1);
