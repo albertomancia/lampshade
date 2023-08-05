@@ -1,6 +1,8 @@
 void mouseDragged() {
     PVector mouse = new PVector(pmouseX, pmouseY);
     boolean handleGrabbed = true;
+    boolean previouslySaved = paramsSaved;
+    paramsSaved = false;
     
     if (mouse.dist(h1) < 30) h1 = mouse.copy();
     else if (mouse.dist(h2) < 30) h2 = mouse.copy();
@@ -21,9 +23,13 @@ void mouseDragged() {
             }
         }
     }
-    if (!handleGrabbed) for (int i = 0; i < n_tiers; i ++) {
-        if (abs(mouse.y - tiers[i]) < 10) {
-            tiers[i] = mouse.y;
+    if (!handleGrabbed) {
+        if (previouslySaved) paramsSaved = true;
+        for (int i = 0; i < n_tiers; i ++) {
+            if (abs(mouse.y - tiers[i]) < 10) {
+                tiers[i] = mouse.y;
+                paramsSaved = false;
+            }
         }
     }
 }
@@ -38,24 +44,42 @@ void keyPressed() {
 }
 
 void keyReleased() {
-    if (key == CODED) {
-        if (keyCode == UP){
-            if (showTemplate) aspectRatio += 0.1;
-            else {
-                addTier();
+    switch (key) {
+        case CODED:
+            if (keyCode == UP){
+                if (showTemplate) aspectRatio += 0.1;
+                else addTier();
             }
-        }
-        else if (keyCode == DOWN) {
-            if (showTemplate) aspectRatio -= 0.1;
-            else {
-                removeTier();
+            else if (keyCode == DOWN) {
+                if (showTemplate) aspectRatio -= 0.1;
+                else removeTier();
             }
-        }
-        aspectRatio = max(aspectRatio, 0.1);
-        aspectRatio = round(aspectRatio*10) / (float) 10;
+            aspectRatio = max(aspectRatio, 0.1);
+            aspectRatio = round(aspectRatio*10) / (float) 10;
+            break;
+        case 'r': 
+            resetTiers();
+            break;
+        case 'R': 
+            resetLerps();
+            break;
+        case 'l': 
+            showLines = !showLines;
+            break;
+        case 't': 
+            showTemplate = !showTemplate;
+            break;
+        case 's': 
+            savingSVG = true;
+            break;
+        case 'S': 
+            saveParams();
+            paramsSaved = true;
+            break;
+        default:
+            ID = int(key) - 48;
+            loadParams();
+            paramsSaved = true;
+            break;
     }
-    if (key == 'r') setTiers();
-    if (key == 'l') showLines = !showLines;
-    if (key == 't') showTemplate = !showTemplate;
-    if (key == 's') save = true;
 }

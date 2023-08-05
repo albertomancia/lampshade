@@ -2,15 +2,17 @@ import processing.svg.*;
 import java.util.*;
 import java.text.DecimalFormat;
 
-int n_tiers = 5, n_pleats = 40; 
+int n_tiers = 5, n_pleats = 40, ID = 1;
 float[] tiers, lerps, angles;
 double[] lengths;
-float margin = 50, aspectRatio = 1.7, totalHeight, windowRatio;
+float margin = 50, aspectRatio = 1.7, defaultLerp = 0.3,
+      totalHeight, windowRatio;
 PVector start, h1, h2, end;
 PVector[] intersections, branchPoints;
 DecimalFormat dfZero;
 
-boolean showTemplate = false, showLines = true, save = false;
+boolean showTemplate = false, showLines = true,
+        savingSVG = false, paramsSaved = true;
 
 void setup() {
     size(1300, 800);
@@ -22,14 +24,13 @@ void setup() {
     h2 = new PVector(200, 300);
     end = new PVector(200, height - margin);
     
-    lerps = new float[n_tiers];
-    Arrays.fill(lerps, 0.3);
-    setTiers();
+    resetTiers();
+    resetLerps();
     smooth(4);
     dfZero = new DecimalFormat("0.0");
     
     textSize(16);
-
+    textAlign(CENTER);
 }
 
 void draw() {
@@ -38,10 +39,8 @@ void draw() {
     loadProfile();
     loadLengthsAndAngles();
 
-    String s = "captures/Capture " + hour() + "-" + minute() + "-" + second() + ".svg";
 
     if (!showTemplate) {
-        if (save) beginRecord(SVG, s);
         noFill();
         if (showLines) {
             strokeWeight(1);
@@ -51,7 +50,7 @@ void draw() {
             stroke(#0000FF);
             bezier(start.x, start.y, h1.x, h1.y, h2.x, h2.y, end.x, end.y);
 
-            stroke(0, 150, 150);
+            stroke(#009696);
             line(start.x, start.y, h1.x, h1.y);
             line(end.x, end.y, h2.x, h2.y);
         
@@ -64,7 +63,8 @@ void draw() {
 
             fill(0);
             float scale = 100 * (tiers[n_tiers-1] - margin) / (float) Arrays.stream(lengths).sum();
-            text (dfZero.format(scale) + "% of paper height", width - 200, tiers[n_tiers-1] / 2);
+            text (String.format("%.01f", scale) + "% of paper height", width - 125, tiers[n_tiers-1] / 2);
+            
             strokeWeight(1);
             line(width - 125, margin, width - 125, tiers[n_tiers-1] / 2 - 14);
             line(width - 125, tiers[n_tiers-1] / 2 + 4, width - 125, tiers[n_tiers-1]);
@@ -77,30 +77,44 @@ void draw() {
 
     } else {
         fill(0);
-        text("pleats: " + n_pleats, 20, 20);
-        text("Aspect ratio 1:" + aspectRatio, 100, 20);
+        text("pleats: " + n_pleats, 60, 20);
+        text("Aspect ratio 1:" + aspectRatio, 200, 20);
 
-        if (save) beginRecord(SVG, s);
+        String filename = "patterns/" + String.format("%02d", ID) + "/";
+        filename +=  n_pleats + "-pleats-1:" + aspectRatio + ".svg";
+        if (savingSVG) beginRecord(SVG, filename);
         noFill();
         stroke(0);
         strokeWeight(1);
         drawTemplate();
+        endRecord();
     }
-    endRecord();
-    save = false;
+    text("Pattern ID: " + ID, width - 125, height - 20);
+    pushStyle();
+    fill(#C61414);
+    textSize(24);
+    if(!paramsSaved) text("UNSAVED CHANGES (SHIFT-S TO SAVE)", width / 2, margin - 10);
+    popStyle();
+    
+    savingSVG = false;
 }
 
-void setTiers() {
+void resetTiers() {
     tiers = new float[n_tiers];
     for (int i = 0; i < n_tiers; i ++) {
         tiers[i] = margin + (i + 1) * totalHeight / (n_tiers + 1);
     }
 }
 
+void resetLerps() {
+    lerps = new float[n_tiers-1];
+    Arrays.fill(lerps, defaultLerp);
+}
+
 void addTier() {
     n_tiers ++;
     tiers = append(tiers, margin + totalHeight * n_tiers / (n_tiers + 1));
-    if (n_tiers > lerps.length) lerps = append(lerps, 0.7);
+    if (n_tiers-1 > lerps.length) lerps = append(lerps, defaultLerp);
     for (int i = 0; i < n_tiers - 1; i ++) {
         float newTier = tiers[i] - margin;
         newTier *= (float) n_tiers / (n_tiers + 1);

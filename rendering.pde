@@ -1,9 +1,3 @@
-void drawTiers() {
-    for (float tier : tiers) {
-        line(0, tier, width, tier);
-    }
-}
-
 void loadIntersections() {
     intersections = new PVector[n_tiers];
     for(int i = 0; i < n_tiers; i ++) {
@@ -16,6 +10,7 @@ void loadProfile() {
     PVector branchPoint = start.copy();
     for(int i = 0; i < n_tiers; i ++) {
         branchPoints[i] = branchPoint.copy();
+        if (i == n_tiers-1) break;
         PVector endPt = intersections[i];
         branchPoint.lerp(endPt, lerps[i]);
     }
@@ -39,6 +34,12 @@ void loadLengthsAndAngles() {
     }
 }
 
+void drawTiers() {
+    for (float tier : tiers) {
+        line(0, tier, width, tier);
+    }
+}
+
 void drawProfile() {
     for (int i = 0; i < n_tiers; i ++) {
         PVector A = branchPoints[i].copy();
@@ -53,29 +54,6 @@ void drawLerpHandles() {
     }
 }
 
-void drawMeasurements() {
-    fill(0);
-    for (int i = 1; i < n_tiers; i ++) {
-        PVector A = branchPoints[i].copy();
-        float theta = degrees(angles[i-1]);
-        text(theta, A.x, A.y);
-    }
-    // for (int i = 0; i < n_tiers; i ++) {
-    //     PVector A = branchPoints[i].copy();
-    //     PVector B = intersections[i].copy();
-    //     PVector T = A.lerp(B, 0.5);
-    //     float l = (float) lengths[i*2];
-    //     text(l, T.x, T.y);
-    //     if (i < n_tiers-1) {
-    //         PVector A2 = branchPoints[i+1].copy();
-    //         T = A2.lerp(B, 0.5);
-    //         l = (float) lengths[i*2+1];
-    //         text(l, T.x, T.y);
-    //     }
-    // }
-    noFill();
-}
-
 void drawTemplate() {
     float tWidth, tHeight;
     if (aspectRatio > windowRatio) {
@@ -86,8 +64,16 @@ void drawTemplate() {
         tWidth = tHeight * aspectRatio;
     }
     float pleatWidth = tWidth / n_pleats;
+
     stroke(#FF0000);
-    rect(margin, margin, tWidth, tHeight);
+    beginShape();
+    vertex(margin + tWidth, margin + tHeight);
+    vertex(margin + tWidth, margin);
+    vertex(margin, margin);
+    vertex(margin, margin + tHeight);
+    vertex(margin + tWidth, margin + tHeight);
+    endShape();
+
     stroke(#0000FF);
     for (float x = margin; x < tWidth + margin - 2; x += pleatWidth) {
         if (x > margin) line(x, margin, x, margin + tHeight);
